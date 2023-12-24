@@ -1,9 +1,10 @@
+use std::sync::Arc;
+
 use crate::discord_types::{
     ApplicationCommandContext, ApplicationCommandOption, ApplicationCommandOptionType,
     ApplicationCommandType, ApplicationIntegrationType, CreateApplicationCommand,
 };
 use crate::AppState;
-use std::sync::Arc;
 
 pub async fn update_commands(app_state: Arc<AppState>) {
     println!("Updating commands");

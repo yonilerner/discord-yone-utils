@@ -1,3 +1,10 @@
+use std::sync::Arc;
+
+use axum::extract::State;
+use axum::http::{HeaderMap, StatusCode};
+use axum::{debug_handler, Json};
+use ed25519_dalek::{Signature, Verifier, VerifyingKey, PUBLIC_KEY_LENGTH};
+
 use crate::commands::handle_command;
 use crate::discord_types::{
     Interaction, InteractionApplicationCommandCallbackData, InteractionCallbackType,
@@ -5,11 +12,6 @@ use crate::discord_types::{
 };
 use crate::errors::InteractionError;
 use crate::AppState;
-use axum::extract::State;
-use axum::http::{HeaderMap, StatusCode};
-use axum::{debug_handler, Json};
-use ed25519_dalek::{Signature, Verifier, VerifyingKey, PUBLIC_KEY_LENGTH};
-use std::sync::Arc;
 
 fn verify_interaction_signature(
     headers: HeaderMap,

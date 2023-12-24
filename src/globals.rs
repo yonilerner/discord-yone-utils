@@ -1,5 +1,6 @@
-use dotenv::dotenv;
 use std::env;
+
+use dotenv::dotenv;
 
 pub struct Globals {
     pub port: String,

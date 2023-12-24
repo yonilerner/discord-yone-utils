@@ -1,7 +1,8 @@
-use serde::{Deserialize, Serialize};
-use serde_json::{Number, Value};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 pub type Snowflake = String;
 
@@ -127,13 +128,6 @@ pub struct ApplicationCommandOptionChoice {
     pub name: String,
     pub value: Value,
     pub name_localizations: Option<HashMap<String, String>>,
-}
-
-#[derive(Clone, Eq, PartialEq)]
-pub enum ApplicationCommandOptionChoiceValue {
-    String(String),
-    Integer(i64),
-    Number(Number),
 }
 
 #[derive(Serialize, Deserialize, Debug)]

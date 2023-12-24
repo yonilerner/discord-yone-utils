@@ -1,11 +1,10 @@
-use crate::commands::flip::handle_flip_command;
-use crate::discord_types::{CreateApplicationCommand, Interaction, InteractionResponse};
-use crate::errors::InteractionError;
-use anyhow::{anyhow, Result};
 use crate::commands::choice::handle_choice_command;
+use crate::commands::flip::handle_flip_command;
+use crate::discord_types::{Interaction, InteractionResponse};
+use crate::errors::InteractionError;
 
-mod flip;
 mod choice;
+mod flip;
 
 pub async fn handle_command(
     interaction: &Interaction,

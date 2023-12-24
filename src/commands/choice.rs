@@ -4,7 +4,6 @@ use crate::discord_types::{
 };
 use crate::errors::InteractionError;
 use rand::prelude::SliceRandom;
-use rand::Rng;
 use serde_json::Value;
 
 pub async fn handle_choice_command(
