@@ -1,4 +1,9 @@
-use crate::discord_types::{InteractionResponse, InteractionResponseType};
+use crate::commands::handle_command;
+use crate::discord_types::{
+    Interaction, InteractionApplicationCommandCallbackData, InteractionCallbackType,
+    InteractionResponse, InteractionType, MessageFlags,
+};
+use crate::errors::InteractionError;
 use crate::AppState;
 use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
@@ -8,7 +13,7 @@ use std::sync::Arc;
 
 fn verify_interaction_signature(
     headers: HeaderMap,
-    body_string: String,
+    body_string: &String,
     public_key: &String,
 ) -> Result<(), StatusCode> {
     let signature = headers
@@ -44,9 +49,44 @@ pub async fn handle_interaction(
     headers: HeaderMap,
     body_string: String,
 ) -> Result<Json<InteractionResponse>, StatusCode> {
-    verify_interaction_signature(headers, body_string, &state.globals.discord_public_key)?;
+    verify_interaction_signature(headers, &body_string, &state.globals.discord_public_key)?;
 
-    Ok(Json(InteractionResponse {
-        r#type: InteractionResponseType::Pong,
-    }))
+    let interaction: Interaction = serde_json::from_str(&body_string).map_err(|e| {
+        eprintln!("Error parsing interaction: {}", e);
+        StatusCode::BAD_REQUEST
+    })?;
+
+    let result = match interaction.r#type {
+        InteractionType::Ping => {
+            return Ok(Json(InteractionResponse {
+                r#type: InteractionCallbackType::Pong,
+                data: None,
+            }))
+        }
+        InteractionType::ApplicationCommand => handle_command(&interaction).await,
+        InteractionType::MessageComponent => Err(InteractionError {
+            message: "Message components are not supported".to_string(),
+        }),
+        InteractionType::ApplicationCommandAutocomplete => Err(InteractionError {
+            message: "Autocomplete not supported".to_string(),
+        }),
+        InteractionType::ModalSubmit => Err(InteractionError {
+            message: "Modals are not supported".to_string(),
+        }),
+    };
+
+    match result {
+        Ok(response) => Ok(Json(response)),
+        Err(error) => {
+            eprintln!("Error handling interaction: {}", error.message);
+            Ok(Json(InteractionResponse {
+                r#type: InteractionCallbackType::ChannelMessageWithSource,
+                data: Some(InteractionApplicationCommandCallbackData {
+                    content: Some(format!("Error handling interaction: {}", error.message)),
+                    embeds: None,
+                    flags: Some(MessageFlags::Ephemeral as u32),
+                }),
+            }))
+        }
+    }
 }
